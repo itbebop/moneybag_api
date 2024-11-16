@@ -1,0 +1,32 @@
+{
+  "name": "nodejsapi",
+  "version": "1.0.0",
+  "description": "NodeJs API with Express and MariaDB",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start:dev": "set NODE_ENV=dev && nodemon src/index.js",
+    "start:prod": "set NODE_ENV=prod && node src/index.js"
+  },
+  "keywords": [
+    "NodeJs",
+    "Express",
+    "MariaDB",
+    "API"
+  ],
+  "author": "itBebop",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "internal-ip": "^8.0.0",
+    "mariadb": "^3.4.0",
+    "nodejsapi": "file:",
+    "pino": "^9.5.0",
+    "pino-pretty": "^13.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}
