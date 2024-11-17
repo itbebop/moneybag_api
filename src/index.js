@@ -3,6 +3,7 @@ import { internalIpV4, internalIpV6  } from 'internal-ip';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import Response from './domain/response.js';
+import logger from './util/logger.js';
 
 dotenv.config();
 const PORT = process.env.SERVER_PORT || 3000;
@@ -20,6 +21,6 @@ app.get('/', (req, res) =>  res.send( new Response(200, 'OK', 'MoneyBag API, v1.
     // 내부 IPv6 주소 가져오기
     // const ipv6 = await internalIpV6();
     // console.log('내부 IPv6 주소:', ipv6); // 예: 'fe80::1'
-    app.listen(PORT, () => console.log(`Server runing on: ${ipv4}:${PORT}`));
+    app.listen(PORT, () => logger.info(`Server running on: ${ipv4}:${PORT}`));
 })();
 // console.log(process.env);
