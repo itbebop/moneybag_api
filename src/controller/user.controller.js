@@ -25,5 +25,55 @@ export const getUsers = (req, res) => {
     });
 };
 
+export const createUser = (req, res) => {
+    logger.info(`${req.method} ${req.originalurl}, creating user`);
+    database.query(QUERY.CREATE_USER, Object.values(req.body), (error, results) => {
+        if(!results) {
+            logger.error(error.message);
+            res.status(httpStatus.INTERNAL_SERVER_ERROR.code)
+            .send(new Response(httpStatus.INTERNAL_SERVER_ERROR.code, httpStatus.INTERNAL_SERVER_ERROR.status, `Error occured`));
+        } else {
+            const user = { uid: results.insertedId, ...req.body, created_at: new Date() };
+            res.status(httpStatus.CREATED.code)
+            .send(new Response(httpStatus.CREATED.code, httpStatus.CREATED.status, `User created`, { user }));
+        }
+    });
+};
+
+export const getUser = (req, res) => {
+    logger.info(`${req.method} ${req.originalurl}, fetching user`);
+    database.query(QUERY.SELECT_USER, [req.params.uid], (error, results) => {
+        if(!results[0]) {
+            res.status(httpStatus.NOT_FOUND.code)
+            .send(new Response(httpStatus.NOT_FOUND.code, httpStatus.NOT_FOUND.status, `User by id ${req.params.id} was not found`));
+        } else {
+            res.status(httpStatus.OK.code)
+            .send(new Response(httpStatus.OK.code, httpStatus.OK.status, `User retrieved`, results[0]));
+        }
+    });
+};
+
+export const updateUser = (req, res) => {
+    logger.info(`${req.method} ${req.originalurl}, fetching user`);
+    database.query(QUERY.SELECT_USER, [req.params.uid], (error, results) => {
+        if(!results[0]) {
+            res.status(httpStatus.NOT_FOUND.code)
+            .send(new Response(httpStatus.NOT_FOUND.code, httpStatus.NOT_FOUND.status, `User by id ${req.params.id} was not found`));
+        } else {
+            logger.info(`${req.method} ${req.originalurl}, updating user`);
+            database.query(QUERY.UPDATE_USER, [...Object.values(req.body), req.params.uid], (error, results) => {
+                if(!error){
+                    res.status(httpStatus.OK.code)
+                    .send(new Response(httpStatus.OK.code, httpStatus.OK.status, `User updated`, { id: req.params.uid, ...req.body }));
+                } else {
+                    logger.error(error.message);
+                    res.status(httpStatus.INTERNAL_SERVER_ERROR.code)
+                    .send(new Response(httpStatus.INTERNAL_SERVER_ERROR.code, httpStatus.INTERNAL_SERVER_ERROR.status, `Error occured`));
+                }
+            });
+        }
+    });
+};
+
 
 export default httpStatus;
