@@ -13,7 +13,7 @@ const httpStatus = {
 };
 
 export const getUsers = (req, res) => {
-    logger.info(`${req.method} ${req.originalurl}, fetching users`);
+    logger.info(`${req.method} ${req.originalUrl}, fetching users`);
     database.query(QUERY.SELECT_USERS, (error, results) => {
         if(!results) {
             res.status(httpStatus.OK.code)
@@ -26,7 +26,7 @@ export const getUsers = (req, res) => {
 };
 
 export const createUser = (req, res) => {
-    logger.info(`${req.method} ${req.originalurl}, creating user`);
+    logger.info(`${req.method} ${req.originalUrl}, creating user`);
     database.query(QUERY.CREATE_USER, Object.values(req.body), (error, results) => {
         if(!results) {
             logger.error(error.message);
@@ -41,7 +41,7 @@ export const createUser = (req, res) => {
 };
 
 export const getUser = (req, res) => {
-    logger.info(`${req.method} ${req.originalurl}, fetching user`);
+    logger.info(`${req.method} ${req.originalUrl}, fetching user`);
     database.query(QUERY.SELECT_USER, [req.params.uid], (error, results) => {
         if(!results[0]) {
             res.status(httpStatus.NOT_FOUND.code)
@@ -54,13 +54,13 @@ export const getUser = (req, res) => {
 };
 
 export const updateUser = (req, res) => {
-    logger.info(`${req.method} ${req.originalurl}, fetching user`);
+    logger.info(`${req.method} ${req.originalUrl}, fetching user`);
     database.query(QUERY.SELECT_USER, [req.params.uid], (error, results) => {
         if(!results[0]) {
             res.status(httpStatus.NOT_FOUND.code)
             .send(new Response(httpStatus.NOT_FOUND.code, httpStatus.NOT_FOUND.status, `User by id ${req.params.id} was not found`));
         } else {
-            logger.info(`${req.method} ${req.originalurl}, updating user`);
+            logger.info(`${req.method} ${req.originalUrl}, updating user`);
             database.query(QUERY.UPDATE_USER, [...Object.values(req.body), req.params.uid], (error, results) => {
                 if(!error){
                     res.status(httpStatus.OK.code)
@@ -76,7 +76,7 @@ export const updateUser = (req, res) => {
 };
 
 export const deleteUser = (req, res) => {
-    logger.info(`${req.method} ${req.originalurl}, deleting user`);
+    logger.info(`${req.method} ${req.originalUrl}, deleting user`);
     database.query(QUERY.DELETE_USER, [req.params.uid], (error, results) => {
         if(results.affectedRows > 0) {
             res.status(httpStatus.OK.code)
