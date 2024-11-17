@@ -75,5 +75,17 @@ export const updateUser = (req, res) => {
     });
 };
 
+export const deleteUser = (req, res) => {
+    logger.info(`${req.method} ${req.originalurl}, deleting user`);
+    database.query(QUERY.DELETE_USER, [req.params.uid], (error, results) => {
+        if(results.affectedRows > 0) {
+            res.status(httpStatus.OK.code)
+            .send(new Response(httpStatus.OK.code, httpStatus.OK.status, `User deleted`, results[0]));            
+        } else {
+            res.status(httpStatus.NOT_FOUND.code)
+            .send(new Response(httpStatus.NOT_FOUND.code, httpStatus.NOT_FOUND.status, `User by id ${req.params.id} was not found`));
+        }
+    });
+};
 
 export default httpStatus;
