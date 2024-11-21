@@ -1,25 +1,8 @@
 import database from '../config/mariadb.config.js';
 import Response from '../domain/response.js';
 import logger from '../util/logger.js';
+import httpStatus from '../config/http.status.js';
 import QUERY from '../repository/user.repository.js';
-
-const httpStatus = {
-  OK: { code: 200, status: 'OK' },
-  CREATED: { code: 201, status: 'CREATED' },
-  NO_CONTENT: { code: 204, status: 'NO_CONTENT' },
-  BAD_REQUEST: { code: 400, status: 'BAD_REQUEST' },
-  NOT_FOUND: { code: 400, status: 'NOT_FOUND' },
-  INTERNAL_SERVER_ERROR: { code: 500, status: 'INTERNAL_SERVER_ERROR' },
-};
-database
-  .getConnection()
-  .then((conn) => {
-    console.log('Database connected successfully');
-    conn.release(); // 연결 해제
-  })
-  .catch((err) => {
-    console.error('Database connection failed:', err);
-  });
 
 export const getUsers = async (req, res) => {
   try {

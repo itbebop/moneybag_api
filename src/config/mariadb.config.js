@@ -11,4 +11,16 @@ const pool = mariadb.createPool({
     connectionLimit: process.env.DB_CONNECTION_LIMIT,
 });
 
+pool
+  .getConnection()
+  .then((conn) => {
+    console.log('Database connected successfully');
+    conn.release(); // 연결 해제
+  })
+  .catch((err) => {
+    console.error('Database connection failed:', err);
+  });
+
+
+
 export default pool;
