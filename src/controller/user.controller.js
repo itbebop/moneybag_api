@@ -133,8 +133,13 @@ export const updateUser = async (req, res) => {
 
 export const changeUserType = async (req, res) => {
   logger.info(`${req.method} ${req.originalUrl}, changing user type`);
+
+  const updates = Object.entries(req.body); // 요청 본문에서 키-값 쌍 추출
+  const userId = req.params.id;
+  const queryValues = [...updates.map(([_, value]) => value), userId];
+
   await handleApiResponse(
-    (params) => database.query(QUERY.UPDATE_USER_TYPE, params),
+    () => database.query(QUERY.UPDATE_USER_TYPE, queryValues),
     [req.params.id],
     `User language updated successfully`,
     `User by id ${req.params.id} not found`,
@@ -143,7 +148,7 @@ export const changeUserType = async (req, res) => {
 };
 
 export const changeLanguage = async (req, res) => {
-  logger.info(`${req.method} ${req.originalUrl}, changing user language`);
+  logger.info(`${req.method} ${req.originalUrl}, changing language`);
 
   const updates = Object.entries(req.body); // 요청 본문에서 키-값 쌍 추출
   const userId = req.params.id;
