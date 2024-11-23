@@ -4,53 +4,65 @@ import logger from "../util/logger.js";
 import httpStatus from "../config/http.status.js";
 import QUERY from "../repository/user.repository.js";
 
-export const getUsers = async (req, res) => {
+// 공통 헬퍼 함수
+const handleApiResponse = async (
+  queryFunction,
+  params,
+  successMessage,
+  notFoundMessage,
+  res
+) => {
   try {
-    logger.info(`${req.method} ${req.originalUrl}, fetching users`);
-
-    const [results] = await database.query(QUERY.SELECT_USERS); // query는 프로미스 기반 함수로 가정
-    logger.info(`Fetched users: ${JSON.stringify(results)}`);
-
+    const results = await queryFunction(params);
     if (!results || results.length === 0) {
-      logger.info("No Users found");
+      logger.info(notFoundMessage);
       return res
         .status(httpStatus.OK.code)
         .send(
           new Response(
             httpStatus.OK.code,
             httpStatus.OK.status,
-            `No Users found`
+            notFoundMessage
           )
         );
     }
 
-    logger.info("Users retrieved successfully");
-    res
-      .status(httpStatus.OK.code)
-      .send(
-        new Response(
-          httpStatus.OK.code,
-          httpStatus.OK.status,
-          `Users retrieved`,
-          { users: results }
-        )
-      );
+    logger.info(successMessage);
+    return res.status(httpStatus.OK.code).send(
+      new Response(
+        httpStatus.OK.code,
+        httpStatus.OK.status,
+        successMessage
+        //{data: results} // Do not know how to serialize a BigInt 에러발생
+      )
+    );
   } catch (error) {
-    logger.error(`Error fetching users: ${error.message}`);
-    res
+    logger.error(`Error: ${error.message}`);
+    return res
       .status(httpStatus.INTERNAL_SERVER_ERROR.code)
       .send(
         new Response(
           httpStatus.INTERNAL_SERVER_ERROR.code,
           httpStatus.INTERNAL_SERVER_ERROR.status,
-          `Error fetching users`,
+          `Internal Server Error`,
           { error: error.message }
         )
       );
   }
 };
 
-// createUser 함수
+// GET users
+export const getUsers = async (req, res) => {
+  logger.info(`${req.method} ${req.originalUrl}, fetching users`);
+  await handleApiResponse(
+    () => database.query(QUERY.SELECT_USERS),
+    null,
+    `Users retrieved successfully`,
+    `No Users found`,
+    res
+  );
+};
+
 export const createUser = async (req, res) => {
   try {
     logger.info(`${req.method} ${req.originalUrl}, creating user`);
@@ -58,15 +70,14 @@ export const createUser = async (req, res) => {
       QUERY.CREATE_USER,
       Object.values(req.body)
     );
-    const user = { uid: results.insertId, ...req.body, created_at: new Date() };
+
     res
       .status(httpStatus.CREATED.code)
       .send(
         new Response(
           httpStatus.CREATED.code,
           httpStatus.CREATED.status,
-          `User created`,
-          { user }
+          `User created. id: ${results.insertId}`
         )
       );
   } catch (error) {
@@ -82,125 +93,85 @@ export const createUser = async (req, res) => {
       );
   }
 };
-
-// getUser 함수
 export const getUser = async (req, res) => {
-  try {
-    const { uid } = req.body; // Body에서 UID 추출
-    logger.info(`${req.method} ${req.originalUrl}, fetching user`);
-    const results = await database.query(QUERY.SELECT_USER, [uid]);
-    if (!results[0]) {
-      return res
-        .status(httpStatus.NOT_FOUND.code)
-        .send(
-          new Response(
-            httpStatus.NOT_FOUND.code,
-            httpStatus.NOT_FOUND.status,
-            `User not found`
-          )
-        );
-    }
+  logger.info(`${req.method} ${req.originalUrl}, fetching user`);
+  await handleApiResponse(
+    (params) => database.query(QUERY.SELECT_USER, params),
+    [req.params.id],
+    `Users retrieved successfully`,
+    `User by id ${req.params.id} not found`,
     res
-      .status(httpStatus.OK.code)
-      .send(
-        new Response(
-          httpStatus.OK.code,
-          httpStatus.OK.status,
-          `User retrieved`,
-          results[0]
-        )
-      );
-  } catch (error) {
-    logger.error(error.message);
-    res
-      .status(httpStatus.INTERNAL_SERVER_ERROR.code)
-      .send(
-        new Response(
-          httpStatus.INTERNAL_SERVER_ERROR.code,
-          httpStatus.INTERNAL_SERVER_ERROR.status,
-          `Error occurred`
-        )
-      );
-  }
+  );
 };
+
 export const updateUser = async (req, res) => {
-  try {
-    const { id, ...updateData } = req.body; // body에서 id와 수정 데이터 추출
-    logger.info(
-      `${req.method} ${req.originalUrl}, updating user with id ${id}`
-    );
+  logger.info(`${req.method} ${req.originalUrl}, updating user`);
 
-    const user = await database.query(QUERY.SELECT_USER, [id]);
-    if (!user[0]) {
-      return res
-        .status(httpStatus.NOT_FOUND.code)
-        .send(
-          new Response(
-            httpStatus.NOT_FOUND.code,
-            httpStatus.NOT_FOUND.status,
-            `User by id ${id} was not found`
-          )
-        );
+  const updateHandler = async (params) => {
+    // 기존 유저 확인
+    const [user] = await database.query(QUERY.SELECT_USER, [params.id]);
+    if (!user) {
+      throw new Error(`User by id ${params.id} not found`);
     }
 
-    await database.query(QUERY.UPDATE_USER, [...Object.values(updateData), id]);
-    res.status(httpStatus.OK.code).send(
-      new Response(httpStatus.OK.code, httpStatus.OK.status, `User updated`, {
-        id,
-        ...updateData,
-      })
-    );
-  } catch (error) {
-    logger.error(error.message);
+    // 유저 업데이트
+    await database.query(QUERY.UPDATE_USER, [
+      ...Object.values(params.body),
+      params.id,
+    ]);
+    return { id: params.id, ...params.body };
+  };
+
+  await handleApiResponse(
+    (params) => updateHandler(params),
+    { id: req.params.id, body: req.body },
+    `User updated successfully`,
+    `User by id ${req.params.id} not found`,
     res
-      .status(httpStatus.INTERNAL_SERVER_ERROR.code)
-      .send(
-        new Response(
-          httpStatus.INTERNAL_SERVER_ERROR.code,
-          httpStatus.INTERNAL_SERVER_ERROR.status,
-          `Error occurred`
-        )
-      );
-  }
+  );
 };
 
-export const deleteUser = async (req, res) => {
-  try {
-    const { id } = req.body; // body에서 id 추출
-    logger.info(
-      `${req.method} ${req.originalUrl}, deleting user with id ${id}`
-    );
-
-    const results = await database.query(QUERY.DELETE_USER, [id]);
-    if (results.affectedRows > 0) {
-      res
-        .status(httpStatus.OK.code)
-        .send(
-          new Response(httpStatus.OK.code, httpStatus.OK.status, `User deleted`)
-        );
-    } else {
-      res
-        .status(httpStatus.NOT_FOUND.code)
-        .send(
-          new Response(
-            httpStatus.NOT_FOUND.code,
-            httpStatus.NOT_FOUND.status,
-            `User by id ${id} was not found`
-          )
-        );
-    }
-  } catch (error) {
-    logger.error(error.message);
+export const changeUserType = async (req, res) => {
+  logger.info(`${req.method} ${req.originalUrl}, changing user type`);
+  await handleApiResponse(
+    (params) => database.query(QUERY.UPDATE_USER_TYPE, params),
+    [req.params.id],
+    `User language updated successfully`,
+    `User by id ${req.params.id} not found`,
     res
-      .status(httpStatus.INTERNAL_SERVER_ERROR.code)
-      .send(
-        new Response(
-          httpStatus.INTERNAL_SERVER_ERROR.code,
-          httpStatus.INTERNAL_SERVER_ERROR.status,
-          `Error occurred`
-        )
-      );
-  }
+  );
+};
+
+export const changeLanguage = async (req, res) => {
+  logger.info(`${req.method} ${req.originalUrl}, changing user language`);
+
+  const updates = Object.entries(req.body); // 요청 본문에서 키-값 쌍 추출
+  const userId = req.params.id;
+  const queryValues = [...updates.map(([_, value]) => value), userId];
+
+  await handleApiResponse(
+    () => database.query(QUERY.UPDATE_USER_LANGUAGE, queryValues),
+    [req.params.id],
+    `User language updated successfully`,
+    `User by id ${req.params.id} not found`,
+    res
+  );
+};
+
+export const changeUserActivation = async (req, res) => {
+  logger.info(`${req.method} ${req.originalUrl}, updating user activation`);
+
+  const updates = Object.entries(req.body); // 요청 본문에서 키-값 쌍 추출
+  const userId = req.params.id;
+  const queryValues = [...updates.map(([_, value]) => value), userId];
+
+  await handleApiResponse(
+    () => database.query(QUERY.UPDATE_USER_ACTIVATION, queryValues),
+    { body: req.body, id: userId },
+    `User activation updated successfully`,
+    `User by id ${userId} not found`,
+    res
+  );
 };
 
 export default httpStatus;
