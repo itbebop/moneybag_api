@@ -1,8 +1,8 @@
-import database from '../config/mariadb.config.js';
-import Response from '../domain/response.js';
-import logger from '../util/logger.js';
-import httpStatus from '../config/http.status.js';
-import QUERY from '../repository/user.repository.js';
+import database from "../config/mariadb.config.js";
+import Response from "../domain/response.js";
+import logger from "../util/logger.js";
+import httpStatus from "../config/http.status.js";
+import QUERY from "../repository/user.repository.js";
 
 export const getUsers = async (req, res) => {
   try {
@@ -12,7 +12,7 @@ export const getUsers = async (req, res) => {
     logger.info(`Fetched users: ${JSON.stringify(results)}`);
 
     if (!results || results.length === 0) {
-      logger.info('No Users found');
+      logger.info("No Users found");
       return res
         .status(httpStatus.OK.code)
         .send(
@@ -24,7 +24,7 @@ export const getUsers = async (req, res) => {
         );
     }
 
-    logger.info('Users retrieved successfully');
+    logger.info("Users retrieved successfully");
     res
       .status(httpStatus.OK.code)
       .send(
@@ -50,6 +50,7 @@ export const getUsers = async (req, res) => {
   }
 };
 
+// createUser 함수
 export const createUser = async (req, res) => {
   try {
     logger.info(`${req.method} ${req.originalUrl}, creating user`);
@@ -82,10 +83,12 @@ export const createUser = async (req, res) => {
   }
 };
 
+// getUser 함수
 export const getUser = async (req, res) => {
   try {
+    const { uid } = req.body; // Body에서 UID 추출
     logger.info(`${req.method} ${req.originalUrl}, fetching user`);
-    const results = await database.query(QUERY.SELECT_USER, [req.params.uid]);
+    const results = await database.query(QUERY.SELECT_USER, [uid]);
     if (!results[0]) {
       return res
         .status(httpStatus.NOT_FOUND.code)
@@ -93,7 +96,7 @@ export const getUser = async (req, res) => {
           new Response(
             httpStatus.NOT_FOUND.code,
             httpStatus.NOT_FOUND.status,
-            `User by id ${req.params.uid} was not found`
+            `User not found`
           )
         );
     }
@@ -120,11 +123,14 @@ export const getUser = async (req, res) => {
       );
   }
 };
-
 export const updateUser = async (req, res) => {
   try {
-    logger.info(`${req.method} ${req.originalUrl}, fetching user`);
-    const user = await database.query(QUERY.SELECT_USER, [req.params.uid]);
+    const { id, ...updateData } = req.body; // body에서 id와 수정 데이터 추출
+    logger.info(
+      `${req.method} ${req.originalUrl}, updating user with id ${id}`
+    );
+
+    const user = await database.query(QUERY.SELECT_USER, [id]);
     if (!user[0]) {
       return res
         .status(httpStatus.NOT_FOUND.code)
@@ -132,20 +138,16 @@ export const updateUser = async (req, res) => {
           new Response(
             httpStatus.NOT_FOUND.code,
             httpStatus.NOT_FOUND.status,
-            `User by id ${req.params.uid} was not found`
+            `User by id ${id} was not found`
           )
         );
     }
 
-    logger.info(`${req.method} ${req.originalUrl}, updating user`);
-    await database.query(QUERY.UPDATE_USER, [
-      ...Object.values(req.body),
-      req.params.uid,
-    ]);
+    await database.query(QUERY.UPDATE_USER, [...Object.values(updateData), id]);
     res.status(httpStatus.OK.code).send(
       new Response(httpStatus.OK.code, httpStatus.OK.status, `User updated`, {
-        id: req.params.uid,
-        ...req.body,
+        id,
+        ...updateData,
       })
     );
   } catch (error) {
@@ -164,8 +166,12 @@ export const updateUser = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
   try {
-    logger.info(`${req.method} ${req.originalUrl}, deleting user`);
-    const results = await database.query(QUERY.DELETE_USER, [req.params.uid]);
+    const { id } = req.body; // body에서 id 추출
+    logger.info(
+      `${req.method} ${req.originalUrl}, deleting user with id ${id}`
+    );
+
+    const results = await database.query(QUERY.DELETE_USER, [id]);
     if (results.affectedRows > 0) {
       res
         .status(httpStatus.OK.code)
@@ -179,7 +185,7 @@ export const deleteUser = async (req, res) => {
           new Response(
             httpStatus.NOT_FOUND.code,
             httpStatus.NOT_FOUND.status,
-            `User by id ${req.params.uid} was not found`
+            `User by id ${id} was not found`
           )
         );
     }
