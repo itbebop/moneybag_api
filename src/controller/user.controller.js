@@ -77,18 +77,19 @@ export const createUser = async (req, res) => {
         new Response(
           httpStatus.CREATED.code,
           httpStatus.CREATED.status,
-          `User created. id: ${results.insertId}`
+          `User created. id: ${results.insertId}`,
+          results.insertId.toString()
         )
       );
   } catch (error) {
-    logger.error(error.message);
+    logger.error(`Error creating user: ${error.message}`);
     res
       .status(httpStatus.INTERNAL_SERVER_ERROR.code)
       .send(
         new Response(
           httpStatus.INTERNAL_SERVER_ERROR.code,
           httpStatus.INTERNAL_SERVER_ERROR.status,
-          `Error occurred`
+          `Error occurred while creating user`
         )
       );
   }
