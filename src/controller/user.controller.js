@@ -95,14 +95,42 @@ export const createUser = async (req, res) => {
   }
 };
 export const getUser = async (req, res) => {
-  logger.info(`${req.method} ${req.originalUrl}, fetching user`);
-  await handleApiResponse(
-    (params) => database.query(QUERY.SELECT_USER, params),
-    [req.params.id],
-    `Users retrieved successfully`,
-    `User by id ${req.params.id} not found`,
-    res
-  );
+  try {
+    logger.info(`${req.method} ${req.originalUrl}, fetching user`);
+
+    const userId = req.params.id;
+
+    // 데이터베이스에서 사용자 정보 가져오기
+    const results = await database.query(QUERY.SELECT_USER, [userId]);
+    logger.info(`### Result: ${JSON.stringify(results)}`);
+
+    // 결과가 없는 경우 처리
+    if (!results || results.length === 0) {
+      return res.status(httpStatus.NOT_FOUND.code).json({
+        code: httpStatus.NOT_FOUND.code,
+        status: httpStatus.NOT_FOUND.status,
+        message: `User by id ${userId} not found`,
+      });
+    }
+
+    const resultUserId = results[0]?.userId; // 결과 배열의 첫 번째 항목의 userId
+
+    // 성공적으로 사용자 정보 반환
+    res.status(httpStatus.OK.code).json({
+      code: httpStatus.OK.code,
+      status: httpStatus.OK.status,
+      message: `User by id ${resultUserId} retrieved successfully`,
+      data: results[0], // 첫 번째 사용자 반환
+    });
+  } catch (error) {
+    logger.error(`Error fetching user: ${error.message}`);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR.code).json({
+      code: httpStatus.INTERNAL_SERVER_ERROR.code,
+      status: httpStatus.INTERNAL_SERVER_ERROR.status,
+      message: "Error occurred while fetching user",
+      error: error.message,
+    });
+  }
 };
 
 export const updateUser = async (req, res) => {
