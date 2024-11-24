@@ -66,10 +66,15 @@ export const getUsers = async (req, res) => {
 export const createUser = async (req, res) => {
   try {
     logger.info(`${req.method} ${req.originalUrl}, creating user`);
-    const results = await database.query(
-      QUERY.CREATE_USER,
-      Object.values(req.body)
-    );
+
+    const { name, email, imgUrl, createAt } = req.body;
+
+    const results = await database.query(QUERY.CREATE_USER, [
+      name,
+      email,
+      imgUrl,
+      createAt,
+    ]);
 
     res
       .status(httpStatus.CREATED.code)

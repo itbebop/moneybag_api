@@ -5,7 +5,8 @@ const QUERY = {
 
   // CHECK_USER: "SELECT * FROM users WHERE email = ?, uid = ?",
 
-  CREATE_USER: "INSERT INTO users (name, email, imgUrl) VALUES (?, ?, ?)",
+  CREATE_USER:
+    "INSERT INTO users (name, email, imgUrl, createAt) VALUES (?, ?, ?, ?)",
 
   UPDATE_USER:
     "UPDATE users SET name = ?, email = ?,  imgUrl = ? WHERE userId = ?",
