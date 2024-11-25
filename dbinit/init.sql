@@ -13,8 +13,8 @@ CREATE TABLE users (
     imgUrl          VARCHAR(255),
     language        VARCHAR(255) DEFAULT 'ko',
     createAt        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    isActivated     BOOL DEFAULT TRUE,
-    unActivatedAt   TIMESTAMP NULL,
+    isDeleted       BOOL DEFAULT TRUE,
+    deletedAt       TIMESTAMP NULL,
 );
 
 CREATE TABLE assets (
