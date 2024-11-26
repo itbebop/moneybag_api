@@ -19,7 +19,7 @@ CREATE TABLE user_pallete (
     colorId        INT AUTO_INCREMENT PRIMARY KEY,
     colorStr       VARCHAR(20),
     colorOrder     INT NOT NULL,
-    userId         INT NOT NULL,
+    userId         INT,
     CONSTRAINT fk_user_pallete FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
 );
 
@@ -75,11 +75,32 @@ CREATE TABLE user_asset (
     id              INT AUTO_INCREMENT PRIMARY KEY,
     userId          INT NOT NULL,
     assetId         INT NOT NULL,
-    firstColor      INT NOT NULL,
-    secondColor     INT NOT NULL,
+    -- firstColor      INT NOT NULL,
+    -- secondColor     INT NOT NULL,
     CONSTRAINT fk_user_asset_user FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE,
     CONSTRAINT fk_user_asset_asset FOREIGN KEY (assetId) REFERENCES assets(assetId) ON DELETE CASCADE,
-    CONSTRAINT fk_user_asset_firstColor FOREIGN KEY (firstColor) REFERENCES user_pallete(colorId) ON DELETE CASCADE,
-    CONSTRAINT fk_user_asset_secondColor FOREIGN KEY (secondColor) REFERENCES user_pallete(colorId) ON DELETE CASCADE
+    -- CONSTRAINT fk_user_asset_firstColor FOREIGN KEY (firstColor) REFERENCES user_pallete(colorId) ON DELETE CASCADE,
+    -- CONSTRAINT fk_user_asset_secondColor FOREIGN KEY (secondColor) REFERENCES user_pallete(colorId) ON DELETE CASCADE
 );
+
+INSERT INTO user_pallete ( colorStr, colorOrder ) VALUES ( '#fff44336', 1);
+INSERT INTO user_pallete ( colorStr, colorOrder ) VALUES ( '#ff4caf50', 2);
+INSERT INTO user_pallete ( colorStr, colorOrder ) VALUES ( '#ff2196f3', 3);
+INSERT INTO user_pallete ( colorStr, colorOrder ) VALUES ( '#ffff9800', 4);
+INSERT INTO user_pallete ( colorStr, colorOrder ) VALUES ( '#ff9c27b0', 5);
+INSERT INTO user_pallete ( colorStr, colorOrder ) VALUES ( '#ffe91e63', 6);
+INSERT INTO user_pallete ( colorStr, colorOrder ) VALUES ( '#ff009688', 7);
+INSERT INTO user_pallete ( colorStr, colorOrder ) VALUES ( '#ffffeb3b', 8);
+INSERT INTO user_pallete ( colorStr, colorOrder ) VALUES ( '#ff795548', 9);
+INSERT INTO user_pallete ( colorStr, colorOrder ) VALUES ( '#ff00bcd4', 10);
+INSERT INTO user_pallete ( colorStr, colorOrder ) VALUES ( '#ffcddc39', 11);
+INSERT INTO user_pallete ( colorStr, colorOrder ) VALUES ( '#ff3f51b5', 12);
+INSERT INTO user_pallete ( colorStr, colorOrder ) VALUES ( '#ff9e9e9e', 13);
+INSERT INTO user_pallete ( colorStr, colorOrder ) VALUES ( '#ffffffff', 14);
+INSERT INTO user_pallete ( colorStr, colorOrder ) VALUES ( '#ff428cc7', 15);
+INSERT INTO user_pallete ( colorStr, colorOrder ) VALUES ( '#ff8097a9', 16);
+INSERT INTO user_pallete ( colorStr, colorOrder ) VALUES ( '#ff002b4d', 17);
+INSERT INTO user_pallete ( colorStr, colorOrder ) VALUES ( '#fffced69', 18);
+INSERT INTO user_pallete ( colorStr, colorOrder ) VALUES ( '#ffff0004', 19);
+INSERT INTO user_pallete ( colorStr, colorOrder ) VALUES ( '#ff043053', 20);
 
