@@ -51,29 +51,17 @@ const handleApiResponse = async (
   }
 };
 
-// GET users
-export const getUsers = async (req, res) => {
-  logger.info(`${req.method} ${req.originalUrl}, fetching users`);
-  await handleApiResponse(
-    () => database.query(QUERY.SELECT_USERS),
-    null,
-    `Users retrieved successfully`,
-    `No Users found`,
-    res
-  );
-};
-
 export const createUser = async (req, res) => {
   try {
     logger.info(`${req.method} ${req.originalUrl}, creating user`);
 
-    const { name, email, imgUrl, createAt, uid } = req.body;
+    const { name, email, imgUrl, createdAt, uid } = req.body;
 
     const results = await database.query(QUERY.CREATE_USER, [
       name,
       email,
       imgUrl,
-      createAt,
+      createdAt,
       uid,
     ]);
 
@@ -100,6 +88,7 @@ export const createUser = async (req, res) => {
       );
   }
 };
+
 export const getUser = async (req, res) => {
   try {
     logger.info(`${req.method} ${req.originalUrl}, fetching user`);
@@ -108,7 +97,6 @@ export const getUser = async (req, res) => {
 
     // 데이터베이스에서 사용자 정보 가져오기
     const results = await database.query(QUERY.SELECT_USER, [userId]);
-    logger.info(`### Result: ${JSON.stringify(results)}`);
 
     // 결과가 없는 경우 처리
     if (!results || results.length === 0) {
