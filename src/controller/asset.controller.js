@@ -19,7 +19,6 @@ export const createAsset = async (req, res) => {
     logger.info(`${req.method} ${req.originalUrl}, creating asset`);
 
     const userId = req.headers["userid"]; // 헤더 키는 대소문자를 구분하지 않음
-    logger.info(`### userId: ${userId}, `);
 
     const { assetName, firstColor, secondColor } = req.body;
 
@@ -28,7 +27,6 @@ export const createAsset = async (req, res) => {
       firstColor,
       secondColor,
     ]);
-    logger.info(`### asset created`);
 
     const assetId = results.insertId;
     logger.info(`associating UserWithAsset ${userId} with ${assetId}`);
@@ -58,15 +56,46 @@ export const createAsset = async (req, res) => {
   }
 };
 
+export const createAssetPallete = async (req, res) => {
+  try {
+    const assetId = req.headers["assetid"];
+
+    const results = await database.query(QUERY.CREATE_ASSET_PALLETE, [assetId]);
+    logger.info(
+      `${req.method} ${req.originalUrl}, creating asset pallete to assetId ${assetId}`
+    );
+
+    res
+      .status(httpStatus.CREATED.code)
+      .send(
+        new Response(
+          httpStatus.CREATED.code,
+          httpStatus.CREATED.status,
+          `Pallete created. id: ${results.insertId}`,
+          results.insertId.toString()
+        )
+      );
+  } catch (error) {
+    logger.error(`Error creating asset pallete: ${error.message}`);
+    res
+      .status(httpStatus.INTERNAL_SERVER_ERROR.code)
+      .send(
+        new Response(
+          httpStatus.INTERNAL_SERVER_ERROR.code,
+          httpStatus.INTERNAL_SERVER_ERROR.status,
+          `Error occurred while creating user`
+        )
+      );
+  }
+};
+
 export const getAssets = async (req, res) => {
   try {
     logger.info(`${req.method} ${req.originalUrl}, fetching assets`);
 
     const userId = req.headers["userid"]; // 헤더 키는 대소문자를 구분하지 않음
-    logger.info(`### header의 userId: ${userId}`);
 
     const [results] = await database.query(QUERY.SELECT_ASSETS, [userId]);
-    logger.info(`### results: ${[results]}`);
 
     // 결과가 없는 경우 빈 리스트 반환
     if (!results || results.length === 0) {
@@ -103,8 +132,7 @@ export const getAsset = async (req, res) => {
   try {
     logger.info(`${req.method} ${req.originalUrl}, fetching asset`);
 
-    // const userId = req.headers["userId"]; // Ensure userId is passed in headers
-    const { assetId } = req.params; // Assume assetId is passed as a URL parameter
+    const assetId = req.params.id; // Assume assetId is passed as a URL parameter
 
     logger.info(`Fetching asset for assetId: ${assetId}`);
 
@@ -124,14 +152,50 @@ export const getAsset = async (req, res) => {
       code: httpStatus.OK.code,
       status: httpStatus.OK.status,
       message: `Asset retrieved successfully`,
-      data: results[0], // Single asset
+      data: results, // Single asset
     });
+    logger.info(`Fetched asset for assetId: ${assetId}`);
   } catch (error) {
     logger.error(`Error: ${error.message}`);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR.code).json({
       code: httpStatus.INTERNAL_SERVER_ERROR.code,
       status: httpStatus.INTERNAL_SERVER_ERROR.status,
       message: "Internal Server Error",
+    });
+  }
+};
+export const getAssetPallete = async (req, res) => {
+  try {
+    const assetId = req.params.id;
+    const [results] = await database.query(QUERY.SELECT_USER_PALLETE, [
+      assetId,
+    ]);
+
+    logger.info(`${req.method} ${req.originalUrl}, fetching userPallete`);
+
+    // 결과가 없는 경우 처리
+    if (!results || results.length === 0) {
+      return res.status(httpStatus.NOT_FOUND.code).json({
+        code: httpStatus.NOT_FOUND.code,
+        status: httpStatus.NOT_FOUND.status,
+        message: `UserPallete by id ${assetId} not found`,
+      });
+    }
+
+    // 성공적으로 사용자 정보 반환
+    res.status(httpStatus.OK.code).json({
+      code: httpStatus.OK.code,
+      status: httpStatus.OK.status,
+      message: `UserPallete by id ${resultUserId} retrieved successfully`,
+      data: results, // 첫 번째 사용자 반환
+    });
+  } catch (error) {
+    logger.error(`Error fetching user: ${error.message}`);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR.code).json({
+      code: httpStatus.INTERNAL_SERVER_ERROR.code,
+      status: httpStatus.INTERNAL_SERVER_ERROR.status,
+      message: "Error occurred while fetching user",
+      error: error.message,
     });
   }
 };
