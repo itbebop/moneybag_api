@@ -1,7 +1,9 @@
 import express from "express";
 import {
   createUser,
+  createUserPallete,
   getUser,
+  getUserPallete,
   updateUser,
   changeUserType,
   changeLanguage,
@@ -18,6 +20,7 @@ const actionHandlers = {
   changeUserActivation: changeUserActivation,
   getUser: getUser,
   createUser: createUser,
+  createUserPallete: createUserPallete,
 };
 
 userRoutes.route("/:id").patch((req, res) => {
@@ -52,8 +55,8 @@ userRoutes.route("/").post((req, res) => {
   }
 });
 // 나머지 경로 정의
-userRoutes.route("/").post(createUser);
+userRoutes.route("/").post(createUser).post(createUserPallete);
 
-userRoutes.route("/:id").get(getUser).put(updateUser);
+userRoutes.route("/:id").get(getUser).get(getUserPallete).put(updateUser);
 
 export default userRoutes;

@@ -89,6 +89,37 @@ export const createUser = async (req, res) => {
   }
 };
 
+export const createUserPallete = async (req, res) => {
+  try {
+    const userId = req.headers["userid"];
+    const results = await database.query(QUERY.CREATE_USER_PALLETE, [userId]);
+    logger.info(
+      `${req.method} ${req.originalUrl}, creating user pallete to assetId ${userId}`
+    );
+    res
+      .status(httpStatus.CREATED.code)
+      .send(
+        new Response(
+          httpStatus.CREATED.code,
+          httpStatus.CREATED.status,
+          `Pallete created. id: ${results.insertId}`,
+          results.insertId.toString()
+        )
+      );
+  } catch (error) {
+    logger.error(`Error creating Pallete: ${error.message}`);
+    res
+      .status(httpStatus.INTERNAL_SERVER_ERROR.code)
+      .send(
+        new Response(
+          httpStatus.INTERNAL_SERVER_ERROR.code,
+          httpStatus.INTERNAL_SERVER_ERROR.status,
+          `Error occurred while creating pallete`
+        )
+      );
+  }
+};
+
 export const getUser = async (req, res) => {
   try {
     logger.info(`${req.method} ${req.originalUrl}, fetching user`);
@@ -115,6 +146,37 @@ export const getUser = async (req, res) => {
       status: httpStatus.OK.status,
       message: `User by id ${resultUserId} retrieved successfully`,
       data: results[0], // 첫 번째 사용자 반환
+    });
+  } catch (error) {
+    logger.error(`Error fetching user: ${error.message}`);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR.code).json({
+      code: httpStatus.INTERNAL_SERVER_ERROR.code,
+      status: httpStatus.INTERNAL_SERVER_ERROR.status,
+      message: "Error occurred while fetching user",
+      error: error.message,
+    });
+  }
+};
+
+export const getUserPallete = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const [results] = await database.query(QUERY.SELECT_USER_PALLETE, [userId]);
+    logger.info(`${req.method} ${req.originalUrl}, fetching userPallete`);
+    // 결과가 없는 경우 처리
+    if (!results || results.length === 0) {
+      return res.status(httpStatus.NOT_FOUND.code).json({
+        code: httpStatus.NOT_FOUND.code,
+        status: httpStatus.NOT_FOUND.status,
+        message: `Pallete by id ${userId} not found`,
+      });
+    }
+    // 성공적으로 사용자 정보 반환
+    res.status(httpStatus.OK.code).json({
+      code: httpStatus.OK.code,
+      status: httpStatus.OK.status,
+      message: `UserPallete by id ${result[0].userId} retrieved successfully`,
+      data: results, // 첫 번째 사용자 반환
     });
   } catch (error) {
     logger.error(`Error fetching user: ${error.message}`);

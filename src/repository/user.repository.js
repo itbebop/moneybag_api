@@ -8,6 +8,9 @@ const QUERY = {
   CREATE_USER:
     "INSERT INTO users (name, email, imgUrl, createdAt, uid) VALUES (?, ?, ?, ?, ?)",
 
+  CREATE_USER_PALLETE:
+    "INSERT INTO user_pallete (hexaCode, colorOrder, userId) SELECT hexaCode, colorOrder, ? AS userId FROM user_pallete WHERE colorId BETWEEN 1 AND 20",
+
   UPDATE_USER:
     "UPDATE users SET name = ?, email = ?,  imgUrl = ? WHERE userId = ?",
 
