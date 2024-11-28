@@ -63,10 +63,8 @@ export const getAssets = async (req, res) => {
     logger.info(`${req.method} ${req.originalUrl}, fetching assets`);
 
     const userId = req.headers["userid"]; // 헤더 키는 대소문자를 구분하지 않음
-    logger.info(`### header의 userId: ${userId}`);
 
     const [results] = await database.query(QUERY.SELECT_ASSETS, [userId]);
-    logger.info(`### results: ${[results]}`);
 
     // 결과가 없는 경우 빈 리스트 반환
     if (!results || results.length === 0) {
@@ -104,7 +102,7 @@ export const getAsset = async (req, res) => {
     logger.info(`${req.method} ${req.originalUrl}, fetching asset`);
 
     // const userId = req.headers["userId"]; // Ensure userId is passed in headers
-    const { assetId } = req.params; // Assume assetId is passed as a URL parameter
+    const assetId = req.params.id; // Assume assetId is passed as a URL parameter
 
     logger.info(`Fetching asset for assetId: ${assetId}`);
 
@@ -124,8 +122,9 @@ export const getAsset = async (req, res) => {
       code: httpStatus.OK.code,
       status: httpStatus.OK.status,
       message: `Asset retrieved successfully`,
-      data: results[0], // Single asset
+      data: results, // Single asset
     });
+    logger.info(`Fetched asset for assetId: ${assetId}`);
   } catch (error) {
     logger.error(`Error: ${error.message}`);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR.code).json({

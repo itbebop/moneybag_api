@@ -8,6 +8,11 @@ import logger from "../util/logger.js";
 
 const assetRoutes = express.Router();
 
+const actionHandlers = {
+  createAsset: createAsset,
+  getAsset: getAsset,
+};
+
 assetRoutes.route("/:id").patch((req, res) => {
   const action = req.headers["action"]; // 요청 헤더에서 action 추출
   logger.info(`PATCH /users/${req.params.id}, action: ${action}`);
