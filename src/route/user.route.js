@@ -1,4 +1,4 @@
-import express from "express";
+import express from 'express';
 import {
   createUser,
   createUserPallete,
@@ -8,8 +8,8 @@ import {
   changeUserType,
   changeLanguage,
   changeUserActivation,
-} from "../controller/user.controller.js";
-import logger from "../util/logger.js";
+} from '../controller/user.controller.js';
+import logger from '../util/logger.js';
 
 const userRoutes = express.Router();
 
@@ -19,44 +19,45 @@ const actionHandlers = {
   changeLanguage: changeLanguage,
   changeUserActivation: changeUserActivation,
   getUser: getUser,
+  getUserPallete: getUserPallete,
   createUser: createUser,
   createUserPallete: createUserPallete,
 };
 
-userRoutes.route("/:id").patch((req, res) => {
-  const action = req.headers["action"]; // 요청 헤더에서 action 추출
+userRoutes.route('/:id').patch((req, res) => {
+  const action = req.headers['action']; // 요청 헤더에서 action 추출
   logger.info(`PATCH /users/${req.params.id}, action: ${action}`);
 
   if (actionHandlers[action]) {
     return actionHandlers[action](req, res); // 해당 핸들러 실행
   } else {
-    return res.status(400).json({ message: "Invalid action" }); // 유효하지 않은 action 처리
+    return res.status(400).json({ message: 'Invalid action' }); // 유효하지 않은 action 처리
   }
 });
-userRoutes.route("/:id").get((req, res) => {
-  const action = req.headers["action"]; // 요청 헤더에서 action 추출
+userRoutes.route('/:id').get((req, res) => {
+  const action = req.headers['action']; // 요청 헤더에서 action 추출
   logger.info(`GET /users/${req.params.id}, action: ${action}`);
 
   if (actionHandlers[action]) {
     return actionHandlers[action](req, res); // 해당 핸들러 실행
   } else {
-    return res.status(400).json({ message: "Invalid action" }); // 유효하지 않은 action 처리
+    return res.status(400).json({ message: 'Invalid action' }); // 유효하지 않은 action 처리
   }
 });
 
-userRoutes.route("/").post((req, res) => {
-  const action = req.headers["action"]; // 요청 헤더에서 action 추출
+userRoutes.route('/').post((req, res) => {
+  const action = req.headers['action']; // 요청 헤더에서 action 추출
   logger.info(`POST /users/${req.params.id}, action: ${action}`);
 
   if (actionHandlers[action]) {
     return actionHandlers[action](req, res); // 해당 핸들러 실행
   } else {
-    return res.status(400).json({ message: "Invalid action" }); // 유효하지 않은 action 처리
+    return res.status(400).json({ message: 'Invalid action' }); // 유효하지 않은 action 처리
   }
 });
 // 나머지 경로 정의
-userRoutes.route("/").post(createUser).post(createUserPallete);
+userRoutes.route('/').post(createUser).post(createUserPallete);
 
-userRoutes.route("/:id").get(getUser).get(getUserPallete).put(updateUser);
+userRoutes.route('/:id').get(getUser).get(getUserPallete).put(updateUser);
 
 export default userRoutes;

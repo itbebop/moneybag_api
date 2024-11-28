@@ -1,8 +1,8 @@
-import database from "../config/mariadb.config.js";
-import Response from "../domain/response.js";
-import logger from "../util/logger.js";
-import httpStatus from "../config/http.status.js";
-import QUERY from "../repository/user.repository.js";
+import database from '../config/mariadb.config.js';
+import Response from '../domain/response.js';
+import logger from '../util/logger.js';
+import httpStatus from '../config/http.status.js';
+import QUERY from '../repository/user.repository.js';
 
 // 공통 헬퍼 함수
 const handleApiResponse = async (
@@ -91,7 +91,7 @@ export const createUser = async (req, res) => {
 
 export const createUserPallete = async (req, res) => {
   try {
-    const userId = req.headers["userid"];
+    const userId = req.headers['userid'];
     const results = await database.query(QUERY.CREATE_USER_PALLETE, [userId]);
     logger.info(
       `${req.method} ${req.originalUrl}, creating user pallete to assetId ${userId}`
@@ -122,12 +122,13 @@ export const createUserPallete = async (req, res) => {
 
 export const getUser = async (req, res) => {
   try {
-    logger.info(`${req.method} ${req.originalUrl}, fetching user`);
-
     const userId = req.params.id;
+    logger.info(
+      `${req.method} ${req.originalUrl}, fetching user by id: ${userId}`
+    );
 
     // 데이터베이스에서 사용자 정보 가져오기
-    const results = await database.query(QUERY.SELECT_USER, [userId]);
+    const [results] = await database.query(QUERY.SELECT_USER, [userId]);
 
     // 결과가 없는 경우 처리
     if (!results || results.length === 0) {
@@ -138,21 +139,19 @@ export const getUser = async (req, res) => {
       });
     }
 
-    const resultUserId = results[0]?.userId; // 결과 배열의 첫 번째 항목의 userId
-
     // 성공적으로 사용자 정보 반환
     res.status(httpStatus.OK.code).json({
       code: httpStatus.OK.code,
       status: httpStatus.OK.status,
-      message: `User by id ${resultUserId} retrieved successfully`,
-      data: results[0], // 첫 번째 사용자 반환
+      message: `User by id ${userId} retrieved successfully`,
+      data: results,
     });
   } catch (error) {
     logger.error(`Error fetching user: ${error.message}`);
     res.status(httpStatus.INTERNAL_SERVER_ERROR.code).json({
       code: httpStatus.INTERNAL_SERVER_ERROR.code,
       status: httpStatus.INTERNAL_SERVER_ERROR.status,
-      message: "Error occurred while fetching user",
+      message: 'Error occurred while fetching user',
       error: error.message,
     });
   }
@@ -161,8 +160,10 @@ export const getUser = async (req, res) => {
 export const getUserPallete = async (req, res) => {
   try {
     const userId = req.params.id;
-    const [results] = await database.query(QUERY.SELECT_USER_PALLETE, [userId]);
-    logger.info(`${req.method} ${req.originalUrl}, fetching userPallete`);
+    const results = await database.query(QUERY.SELECT_USER_PALLETE, [userId]);
+    logger.info(`${req.method} ${req.originalUrl}, fetching Pallete`);
+    // logger.info(`### result: ${JSON.stringify(results, null, 2)}`);
+
     // 결과가 없는 경우 처리
     if (!results || results.length === 0) {
       return res.status(httpStatus.NOT_FOUND.code).json({
@@ -171,19 +172,22 @@ export const getUserPallete = async (req, res) => {
         message: `Pallete by id ${userId} not found`,
       });
     }
-    // 성공적으로 사용자 정보 반환
+
     res.status(httpStatus.OK.code).json({
       code: httpStatus.OK.code,
       status: httpStatus.OK.status,
-      message: `UserPallete by id ${result[0].userId} retrieved successfully`,
-      data: results, // 첫 번째 사용자 반환
+      message: `UserPallete retrieved successfully`,
+      data: {
+        columns: ['colorId', 'hexaCode', 'colorOrder', 'userId'],
+        rows: results,
+      },
     });
   } catch (error) {
-    logger.error(`Error fetching user: ${error.message}`);
+    logger.error(`Error fetching pallete: ${error.message}`);
     res.status(httpStatus.INTERNAL_SERVER_ERROR.code).json({
       code: httpStatus.INTERNAL_SERVER_ERROR.code,
       status: httpStatus.INTERNAL_SERVER_ERROR.status,
-      message: "Error occurred while fetching user",
+      message: 'Error occurred while fetching pallete',
       error: error.message,
     });
   }
