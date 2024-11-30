@@ -5,6 +5,7 @@ import cors from "cors";
 import Response from "./domain/response.js";
 import httpStatus from "./controller/user.controller.js";
 import userRoutes from "./route/user.route.js";
+import palleteRoutes from "./route/pallete.route.js";
 import assetRoutes from "./route/asset.route.js";
 import categoryRoutes from "./route/category.route.js";
 import logger from "./util/logger.js";
@@ -21,6 +22,9 @@ app.use("/users", userRoutes);
 
 // asset routes
 app.use("/assets", assetRoutes);
+
+// pallete routes
+app.use("/pallete", palleteRoutes);
 
 // category routes
 app.use("/categories", categoryRoutes);
