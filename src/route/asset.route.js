@@ -3,6 +3,7 @@ import {
   getAssets,
   getAsset,
   createAsset,
+  updateAsset,
 } from "../controller/asset.controller.js";
 import logger from "../util/logger.js";
 
@@ -15,7 +16,7 @@ const actionHandlers = {
 
 assetRoutes.route("/:id").patch((req, res) => {
   const action = req.headers["action"]; // 요청 헤더에서 action 추출
-  logger.info(`PATCH /users/${req.params.id}, action: ${action}`);
+  logger.info(`PATCH /assets/${req.params.id}, action: ${action}`);
 
   if (actionHandlers[action]) {
     return actionHandlers[action](req, res); // 해당 핸들러 실행
@@ -27,6 +28,6 @@ assetRoutes.route("/:id").patch((req, res) => {
 // 나머지 경로 정의
 assetRoutes.route("/").get(getAssets).post(createAsset);
 
-assetRoutes.route("/:id").get(getAsset);
+assetRoutes.route("/:id").get(getAsset).put(updateAsset);
 
 export default assetRoutes;

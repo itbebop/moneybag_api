@@ -9,7 +9,7 @@ const QUERY = {
   CREATE_USER_ASSET: "INSERT INTO user_asset (userId, assetId) VALUES (?, ?)",
 
   UPDATE_ASSET:
-    "UPDATE assets SET asset_name = ?, currency = ?, firstColor = ?, secondColor = ?",
+    "UPDATE assets SET assetName = ?, currency = ?, firstColor = ?, secondColor = ? WHERE assetId = ?",
   DELETE_ASSET: "",
 };
 
