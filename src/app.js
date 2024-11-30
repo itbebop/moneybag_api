@@ -6,6 +6,7 @@ import Response from "./domain/response.js";
 import httpStatus from "./controller/user.controller.js";
 import userRoutes from "./route/user.route.js";
 import assetRoutes from "./route/asset.route.js";
+import categoryRoutes from "./route/category.route.js";
 import logger from "./util/logger.js";
 
 dotenv.config();
@@ -20,6 +21,10 @@ app.use("/users", userRoutes);
 
 // asset routes
 app.use("/assets", assetRoutes);
+
+// category routes
+app.use("/categories", categoryRoutes);
+
 // main routes
 app.get("/", (req, res) =>
   res.send(
