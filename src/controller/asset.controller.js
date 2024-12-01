@@ -64,7 +64,7 @@ export const createAsset = async (req, res) => {
   try {
     logger.info(`${req.method} ${req.originalUrl}, creating asset`);
 
-    const userId = req.headers["userid"]; // 헤더 키는 대소문자를 구분하지 않음
+    const userId = req.params.id; // 헤더 키는 대소문자를 구분하지 않음
     logger.info(`### userId: ${userId}, `);
 
     const { assetName, firstColor, secondColor } = req.body;
@@ -106,11 +106,10 @@ export const createAsset = async (req, res) => {
 
 export const getAssets = async (req, res) => {
   try {
-    logger.info(`${req.method} ${req.originalUrl}, fetching assets`);
-
     const userId = req.headers["userid"]; // 헤더 키는 대소문자를 구분하지 않음
 
-    const [results] = await database.query(QUERY.SELECT_ASSETS, [userId]);
+    const results = await database.query(QUERY.SELECT_ASSETS, [userId]);
+    logger.info(`${req.method} ${req.originalUrl}, fetching Assets`);
 
     // 결과가 없는 경우 빈 리스트 반환
     if (!results || results.length === 0) {
@@ -126,7 +125,18 @@ export const getAssets = async (req, res) => {
       code: httpStatus.OK.code,
       status: httpStatus.OK.status,
       message: `Assets by id ${userId} retrieved successfully`,
-      data: results, // 모든 사용자 데이터를 반환
+      data: {
+        columns: [
+          "assetName",
+          "currency",
+          "createAt",
+          "updateAt",
+          "isActivated",
+          "firstColor",
+          "secondColor",
+        ],
+        rows: results,
+      }, // 모든 사용자 데이터를 반환
     });
   } catch (error) {
     logger.error(`Error: ${error.message}`);
@@ -170,7 +180,6 @@ export const getAsset = async (req, res) => {
       message: `Asset retrieved successfully`,
       data: results, // Single asset
     });
-    logger.info(`Fetched asset for assetId: ${assetId}`);
   } catch (error) {
     logger.error(`Error: ${error.message}`);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR.code).json({

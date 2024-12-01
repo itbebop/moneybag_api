@@ -9,11 +9,6 @@ import logger from "../util/logger.js";
 
 const assetRoutes = express.Router();
 
-const actionHandlers = {
-  createAsset: createAsset,
-  getAsset: getAsset,
-};
-
 assetRoutes.route("/:id").patch((req, res) => {
   const action = req.headers["action"]; // 요청 헤더에서 action 추출
   logger.info(`PATCH /assets/${req.params.id}, action: ${action}`);
@@ -26,8 +21,8 @@ assetRoutes.route("/:id").patch((req, res) => {
 });
 
 // 나머지 경로 정의
-assetRoutes.route("/").get(getAssets).post(createAsset);
+assetRoutes.route("/").get(getAssets);
 
-assetRoutes.route("/:id").get(getAsset).put(updateAsset);
+assetRoutes.route("/:id").post(createAsset).get(getAsset).put(updateAsset);
 
 export default assetRoutes;
