@@ -1,5 +1,5 @@
 const QUERY = {
-  SELECT_CATEGORIES: "SELECT * FROM category WHERE userId = ?, level = ?",
+  SELECT_CATEGORIES: "SELECT * FROM category WHERE userId = ? AND level = 1",
 
   SELECT_CATEGORY_BY_ID: "SELECT * FROM category WHERE categoryId = ?",
 

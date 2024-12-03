@@ -91,9 +91,10 @@ export const createCategory = async (req, res) => {
 
 export const getCategories = async (req, res) => {
   try {
-    logger.info(`${req.method} ${req.originalUrl}, fetching Categories`);
-
     const userId = req.headers["userid"]; // 헤더 키는 대소문자를 구분하지 않음
+    logger.info(
+      `${req.method} ${req.originalUrl}, fetching Categories by id : ${userId}`
+    );
 
     const [results] = await database.query(QUERY.SELECT_CATEGORIES, [userId]);
 
@@ -111,7 +112,9 @@ export const getCategories = async (req, res) => {
       code: httpStatus.OK.code,
       status: httpStatus.OK.status,
       message: `Categories by id ${userId} retrieved successfully`,
-      data: results, // 모든 사용자 데이터를 반환
+      data: {
+        results,
+      }, // 모든 사용자 데이터를 반환
     });
   } catch (error) {
     logger.error(`Error: ${error.message}`);
