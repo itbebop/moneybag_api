@@ -35,14 +35,17 @@ CREATE TABLE assets (
 );
 
 CREATE TABLE category (
-    categoryId     INT AUTO_INCREMENT PRIMARY KEY,
-    categoryName   VARCHAR(255) NOT NULL,
-    iconKey        VARCHAR(255) DEFAULT NULL,
-    assetType      VARCHAR(255) NOT NULL,
-    level          INT DEFAULT 1
-    userId         INT,
-    CONSTRAINT fk_user_pallete FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
+    categoryId          INT AUTO_INCREMENT PRIMARY KEY,
+    categoryName        VARCHAR(255) NOT NULL,
+    iconKey             VARCHAR(255) DEFAULT NULL,
+    assetType           VARCHAR(255) NOT NULL,
+    level               INT DEFAULT 1,
+    userId              INT,
+    parentCategoryId    INT DEFAULT NULL,
+    CONSTRAINT fk_user_palette FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE,
+    CONSTRAINT fk_parent_category FOREIGN KEY (parentCategoryId) REFERENCES category(categoryId) ON DELETE SET NULL
 );
+
 
 CREATE TABLE transactions (
     transactionId      INT AUTO_INCREMENT PRIMARY KEY,
