@@ -54,7 +54,16 @@ export const createCategory = async (req, res) => {
   try {
     logger.info(`${req.method} ${req.originalUrl}, creating Category`);
 
-    const { categoryName, iconKey, assetType, level, userId } = req.body;
+    const {
+      categoryName,
+      iconKey,
+      assetType,
+      level,
+      userId,
+      parentCategoryId,
+    } = req.body;
+    // parentCategoryId가 null인 경우 최상위 카테고리로 처리
+    const isTopLevel = parentCategoryId === null;
 
     const results = await database.query(QUERY.CREATE_CATEGORY, [
       categoryName,
@@ -62,6 +71,7 @@ export const createCategory = async (req, res) => {
       assetType,
       level,
       userId,
+      isTopLevel ? null : parentCategoryId, // 최상위 카테고리는 null로 설정
     ]);
     logger.info(`Category created`);
 
@@ -91,12 +101,16 @@ export const createCategory = async (req, res) => {
 
 export const getCategories = async (req, res) => {
   try {
-    const userId = req.headers["userid"]; // 헤더 키는 대소문자를 구분하지 않음
+    const userId = req.headers["userid"];
+    const level = req.headers["level"];
     logger.info(
       `${req.method} ${req.originalUrl}, fetching Categories by id : ${userId}`
     );
 
-    const [results] = await database.query(QUERY.SELECT_CATEGORIES, [userId]);
+    const results = await database.query(QUERY.SELECT_CATEGORIES, [
+      userId,
+      level,
+    ]);
 
     // 결과가 없는 경우 빈 리스트 반환
     if (!results || results.length === 0) {
@@ -174,21 +188,14 @@ export const updateCategory = async (req, res) => {
   const categoryId = req.params.id;
   const updateHandler = async (params) => {
     const [category] = await database.query(QUERY.SELECT_CATEGORY_BY_ID, [
-      params.id,
+      categoryId,
     ]);
     if (!category) {
-      throw new Error(`Category by id ${params.id} not found`);
+      throw new Error(`Category by id ${categoryId} not found`);
     }
 
-    // Asset 업데이트
-    const { assetName, currency, firstColor, secondColor } = req.body;
-    await database.query(QUERY.UPDATE_CATEGORY, [
-      assetName,
-      currency,
-      firstColor,
-      secondColor,
-      params.id,
-    ]);
+    const { categoryName, iconKey } = req.body;
+    await database.query(QUERY.UPDATE_CATEGORY, [categoryName, iconKey]);
     return { id: params.id, ...params.body };
   };
 
