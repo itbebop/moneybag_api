@@ -53,7 +53,6 @@ const handleApiResponse = async (
 export const createCategory = async (req, res) => {
   try {
     logger.info(`${req.method} ${req.originalUrl}, creating Category`);
-
     const {
       categoryName,
       iconKey,
@@ -62,17 +61,22 @@ export const createCategory = async (req, res) => {
       userId,
       parentCategoryId,
     } = req.body;
-    // parentCategoryId가 null인 경우 최상위 카테고리로 처리
-    const isTopLevel = parentCategoryId === null;
+    const isCategory = parentCategoryId === null;
 
-    const results = await database.query(QUERY.CREATE_CATEGORY, [
-      categoryName,
-      iconKey,
-      assetType,
-      level,
-      userId,
-      isTopLevel ? null : parentCategoryId, // 최상위 카테고리는 null로 설정
-    ]);
+    const query = isCategory
+      ? QUERY.CREATE_CATEGORY
+      : QUERY.CREATE_SUB_CATEGORY;
+    // logger.info(`### query : ${query}`);
+
+    const params = isCategory
+      ? [categoryName, iconKey, assetType, level, userId]
+      : [categoryName, iconKey, assetType, level, userId, parentCategoryId];
+    // logger.info(`### params : ${params}`);
+    // if (isCategory) {
+    //   logger.info(`### parentCategoryId : ${parentCategoryId}`);
+    // }
+
+    const results = await database.query(query, params);
     logger.info(`Category created`);
 
     res
@@ -103,22 +107,34 @@ export const getCategories = async (req, res) => {
   try {
     const userId = req.headers["userid"];
     const level = req.headers["level"];
+    const parentCategoryId = req.headers["parentcategoryid"];
+    const isCategory = parentCategoryId == 0;
+    logger.info(`### headers : ${JSON.stringify(req.headers)}`);
     logger.info(
       `${req.method} ${req.originalUrl}, fetching Categories by id : ${userId}`
     );
 
-    const results = await database.query(QUERY.SELECT_CATEGORIES, [
-      userId,
-      level,
-    ]);
+    const query = isCategory
+      ? QUERY.SELECT_CATEGORIES
+      : QUERY.SELECT_SUB_CATEGORIES;
+    // logger.info(`### query : ${query}`);
 
-    // 결과가 없는 경우 빈 리스트 반환
+    const params = isCategory
+      ? [userId, level]
+      : [userId, level, parentCategoryId];
+    // logger.info(`### params : ${params}`);
+    // if (isCategory) {
+    //   logger.info(`### parentCategoryId : ${parentCategoryId}`);
+    // }
+
+    const results = await database.query(query, params);
+
     if (!results || results.length === 0) {
       return res.status(httpStatus.OK.code).json({
         code: httpStatus.OK.code,
         status: httpStatus.OK.status,
         message: `No Categories found for user id ${userId}`,
-        data: [],
+        data: {},
       });
     }
 
@@ -128,7 +144,7 @@ export const getCategories = async (req, res) => {
       message: `Categories by id ${userId} retrieved successfully`,
       data: {
         results,
-      }, // 모든 사용자 데이터를 반환
+      },
     });
   } catch (error) {
     logger.error(`Error: ${error.message}`);
