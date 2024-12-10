@@ -13,7 +13,7 @@ const QUERY = {
     "INSERT INTO category (categoryName, iconKey, assetType, level, userId, parentCategoryId) VALUES (?, ?, ?, ?, ?, ?)",
 
   UPDATE_CATEGORY:
-    "UPDATE assets SET categoryName = ?, iconKey = ?, WHERE categoryId = ?",
+    "UPDATE category SET categoryName = ?, iconKey = ? WHERE categoryId = ?",
 
   DELETE_CATEGORY: "DELETE from category WHERE categoryId = ?",
 };
